@@ -1,6 +1,8 @@
+const dailyTodoList = document.querySelector("#dailyTodoList");
 const todoList = document.querySelector("#todoList");
 const newTask = document.querySelector("#newTask");
 const addNew = document.querySelector("#addNew");
+const daily = document.querySelector("#daily");
 const mainEventListener = document.querySelector("#mainEventListener");
 
 let dynamicData = [];
@@ -9,14 +11,16 @@ let dynamicData = [];
 
 let activeEdit;
 let activeToggle = 0;
-
+const time = new Date();
+const date = time.getDate();
 mainEventListener.addEventListener("click", manageClick);
 
 function manageClick(event) {
   const currentItem = event.target;
   if (
     activeToggle === 1 &&
-    currentItem !== activeEdit.children[0].children[1]
+    currentItem !== activeEdit.children[0].children[1] &&
+    currentItem.closest("div") !== activeEdit.children[1]
   ) {
     endEdit(activeEdit);
   }
@@ -39,26 +43,38 @@ function manageClick(event) {
 
 function addNewTask() {
   const newText = newTask.value;
+  const isDaily = daily.checked;
 
   if (!newText) {
     alert("Ingresa una tarea nueva");
   } else {
     const newListItem = createListItem();
-    const newSpan = document.createElement("span");
+    const newSpan = createSpan();
     const newInput = createInput();
     const innerSpan = createInnerSpan(newText);
     const newDiv = createButtonDiv();
-
-    todoList.appendChild(newListItem);
+    if (isDaily) {
+      if (dailyTodoList.children.length > 0) {
+        newListItem.classList.add("border-t");
+      }
+      dailyTodoList.appendChild(newListItem);
+    } else {
+      if (todoList.children.length > 0) {
+        newListItem.classList.add("border-t");
+      }
+      todoList.appendChild(newListItem);
+    }
     newListItem.appendChild(newSpan);
     newListItem.appendChild(newDiv);
     newSpan.appendChild(newInput);
     newSpan.appendChild(innerSpan);
 
     newTask.value = "";
+    daily.checked = false;
     const dynamicObject = {
       task: newText,
       finished: 0,
+      daily: isDaily,
     };
     dynamicData.push(dynamicObject);
     try {
@@ -72,12 +88,17 @@ function addNewTask() {
 
 function createListItem() {
   const newListItem = document.createElement("li");
-  const listClasses = "flex justify-between border-b border-acc3 py-2".split(
+  const listClasses = "relative flex justify-between border-acc3 py-2".split(
     " ",
   );
   newListItem.classList.add(...listClasses);
   newListItem.id = dynamicData.length;
   return newListItem;
+}
+function createSpan() {
+  const newSpan = document.createElement("span");
+  newSpan.classList.add("flex", "items-center");
+  return newSpan;
 }
 
 function createInput() {
@@ -142,27 +163,41 @@ function editTask(event) {
   const currentListItem = event.closest("li");
   const taskText = currentListItem.children[0].children[1].textContent;
   const inputClasses =
-    "w-80 border border-acc3 placeholder:text-gray-400 bg-acc1 p-1 rounded-md text-acc5 caret-acc5 focus:outline-none focus:bg-white focus:inset-ring-1 focus:inset-ring-acc5".split(
+    "w-30 md:w-80 border border-acc3 placeholder:text-gray-400 bg-acc1 p-1 rounded-md text-acc5 caret-acc5 focus:outline-none focus:bg-white focus:inset-ring-1 focus:inset-ring-acc5".split(
       " ",
     );
+  const changeListClasses = "flex flex-col items-center".split(" ");
   textBeforeEdit = taskText;
   const editBox = document.createElement("input");
   editBox.type = "text";
   editBox.value = taskText;
   editBox.classList.add(...inputClasses);
+  const changeListRadio = document.createElement("div");
+  changeListRadio.classList.add(...changeListClasses);
+  changeListRadio.innerHTML = `
+          <label for="change" class="text-sm text-acc5">Cambiar</label>
+          <input type="radio" name="change" id="change" class="accent-acc5 scale-125">
+  `;
+
   currentListItem.children[0].children[1].remove();
   currentListItem.children[0].appendChild(editBox);
+  currentListItem.children[0].insertAdjacentElement(
+    "afterend",
+    changeListRadio,
+  );
   activeEdit = currentListItem;
   activeToggle = 1;
 }
 
 function endEdit(active) {
   const edittedTask = active.children[0].children[1].value;
+  const ifChange = active.children[1].children[1].checked;
   if (edittedTask) {
     active.children[0].children[1].remove();
+    active.children[1].remove();
     const textEdit = createInnerSpan(edittedTask);
     active.children[0].appendChild(textEdit);
-    if(active.children[0].children[0].checked){
+    if (active.children[0].children[0].checked) {
       textEdit.classList.add("line-through");
     }
 
@@ -172,17 +207,27 @@ function endEdit(active) {
       (object) => object.task === textBeforeEdit,
     );
     currentObject.task = edittedTask;
+    if (ifChange && currentObject.daily) {
+      currentObject.daily = false;
+    } else if(ifChange){
+      currentObject.daily = true;
+    }
+
     try {
       localStorage.setItem("myDynamicObject", JSON.stringify(dynamicData));
       console.log("Guaradado Correctamente");
     } catch (error) {
       console.error("Error:", error);
     }
-
   } else {
     alert("Ingresa un nuevo nombre");
   }
+  renderTasks(dynamicData);
 }
+
+
+
+
 
 /******************************************************************************
  
@@ -229,30 +274,22 @@ function finishTask(event) {
 
 function loadSave() {
   const storedDataString = localStorage.getItem("myDynamicObject");
+  const storedDate = Number(localStorage.getItem("myDate"));
+
   if (storedDataString) {
     try {
       const retrievedObject = JSON.parse(storedDataString);
+      
       console.log("Retrieved object:", retrievedObject);
-      retrievedObject.forEach((element) => {
-        const newListItem = createListItem();
-        const newSpan = document.createElement("span");
-        const newInput = createInput();
-        const innerSpan = createInnerSpan(element.task);
-        const newDiv = createButtonDiv();
-
-        if (element.finished === 1) {
-          innerSpan.classList.add("line-through");
-          newInput.checked = true;
+      if(storedDate){
+        console.log(`Retrieved Date: ${storedDate}`);
+        if(storedDate !== date){
+          resetDailyItems(retrievedObject);
         }
-
-        todoList.appendChild(newListItem);
-        newListItem.appendChild(newSpan);
-        newListItem.appendChild(newDiv);
-        newSpan.appendChild(newInput);
-        newSpan.appendChild(innerSpan);
-
-        dynamicData.push(element);
-      });
+      }
+      renderTasks(retrievedObject);
+      dynamicData = [...retrievedObject];
+      localStorage.setItem("myDate", String(date))
     } catch (error) {
       console.error("Error:", error);
     }
@@ -261,3 +298,45 @@ function loadSave() {
   }
 }
 loadSave();
+
+function renderTasks(retrievedObject){
+  todoList.innerHTML= '';
+  dailyTodoList.innerHTML= '';
+  retrievedObject.forEach((element) => {
+        const newListItem = createListItem();
+        const newSpan = createSpan();
+        const newInput = createInput();
+        const innerSpan = createInnerSpan(element.task);
+        const newDiv = createButtonDiv();
+
+        if (element.finished === 1) {
+          innerSpan.classList.add("line-through");
+          newInput.checked = true;
+        }
+        if (element.daily) {
+          if (dailyTodoList.children.length > 0) {
+            newListItem.classList.add("border-t");
+          }
+          dailyTodoList.appendChild(newListItem);
+        } else {
+          if (todoList.children.length > 0) {
+            newListItem.classList.add("border-t");
+          }
+          todoList.appendChild(newListItem);
+        }
+        newListItem.appendChild(newSpan);
+        newListItem.appendChild(newDiv);
+        newSpan.appendChild(newInput);
+        newSpan.appendChild(innerSpan);
+
+      });
+}
+
+
+function resetDailyItems(retrievedObject){
+  retrievedObject.forEach((item) =>{
+    if(item.daily){
+      item.finished = 0;
+    }
+  });
+}
