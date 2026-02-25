@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+
+@theme {
+
+    --color-acc1:#f0fdf4;
+    --color-acc2:#dcfce7;
+    --color-acc3:#7bf1a8;
+    --color-acc4:#05df72;
+    --color-acc5:#0d542b;
+
+    --font-nunito:"Nunito", sans-serif;
+}

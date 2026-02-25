@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
+      rel="stylesheet"
+    />
+    <title>Lista De Tareas</title>
+    <link rel="stylesheet" href="./src/style.css" />
+    <script type="module" src="./src/main.js"></script>
+  </head>
+  <body id="mainEventListener"
+    class="flex justify-center items-center min-w-full min-h-screen bg-acc2 font-nunito"
+  >
+    <main 
+      class="flex flex-col justify-center items-center gap-4 w-sm md:w-xl rounded-lg p-5 bg-white m-6"
+    >
+      <h1 class="text-3xl text-center text-acc5 underline">Lista de Tareas</h1>
+      <ul id="todoList" class="w-xs md:w-lg">
+        
+      </ul>
+      <div class="flex flex-col md:block">
+        <input
+          type="text"
+          id="newTask"
+          name="newTask"
+          placeholder="Agrega Nueva Tarea"
+          class="w-xs md:w-80 border  border-acc3 placeholder:text-gray-400 bg-acc1 p-1 rounded-md text-acc5 caret-acc5 focus:outline-none focus:bg-white focus:inset-ring-1 focus:inset-ring-acc5"
+        />
+        <button
+          type="button"
+          id="addNew"
+          class="my-3 self-center p-2 border text-xs md:text-base border-acc5 bg-acc5 text-acc3 rounded-2xl w-xs md:w-20 hover:bg-acc3 hover:text-acc5 active:bg-acc4 transition duration-200 ease-in-out"
+        >
+          Agregar
+        </button>
+      </div>
+    </main>
+  </body>
+</html>
