@@ -15,6 +15,7 @@ const time = new Date();
 const date = time.getDate();
 const month = time.getMonth() + 1;
 mainEventListener.addEventListener("click", manageClick);
+mainEventListener.addEventListener("keydown", manageKey);
 
 function manageClick(event) {
   const currentItem = event.target;
@@ -33,6 +34,12 @@ function manageClick(event) {
     editTask(event.target);
   } else if (currentItem.type === "checkbox") {
     finishTask(event.target);
+  }
+}
+
+function manageKey(event) {
+  if (activeToggle === 1 && event.key === "Enter") {
+    endEdit(activeEdit);
   }
 }
 
