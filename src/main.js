@@ -13,6 +13,7 @@ let activeEdit;
 let activeToggle = 0;
 const time = new Date();
 const date = time.getDate();
+const month = time.getMonth + 1;
 mainEventListener.addEventListener("click", manageClick);
 
 function manageClick(event) {
@@ -271,6 +272,7 @@ function finishTask(event) {
 function loadSave() {
   const storedDataString = localStorage.getItem("myDynamicObject");
   const storedDate = Number(localStorage.getItem("myDate"));
+  const storedMonth = Number(localStorage.getItem("myMonth"));
 
   if (storedDataString) {
     try {
@@ -279,13 +281,15 @@ function loadSave() {
       console.log("Retrieved object:", retrievedObject);
       if (storedDate) {
         console.log(`Retrieved Date: ${storedDate}`);
-        if (storedDate !== date) {
+        if (storedDate !== date || storedMonth !== month) {
           resetDailyItems(retrievedObject);
         }
       }
       renderTasks(retrievedObject);
       dynamicData = [...retrievedObject];
       localStorage.setItem("myDate", String(date));
+      localStorage.setItem("myDate", String(month));
+      
     } catch (error) {
       console.error("Error:", error);
     }
