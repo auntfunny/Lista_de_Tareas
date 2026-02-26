@@ -209,7 +209,7 @@ function endEdit(active) {
     currentObject.task = edittedTask;
     if (ifChange && currentObject.daily) {
       currentObject.daily = false;
-    } else if(ifChange){
+    } else if (ifChange) {
       currentObject.daily = true;
     }
 
@@ -224,10 +224,6 @@ function endEdit(active) {
   }
   renderTasks(dynamicData);
 }
-
-
-
-
 
 /******************************************************************************
  
@@ -279,17 +275,17 @@ function loadSave() {
   if (storedDataString) {
     try {
       const retrievedObject = JSON.parse(storedDataString);
-      
+
       console.log("Retrieved object:", retrievedObject);
-      if(storedDate){
+      if (storedDate) {
         console.log(`Retrieved Date: ${storedDate}`);
-        if(storedDate !== date){
+        if (storedDate !== date) {
           resetDailyItems(retrievedObject);
         }
       }
       renderTasks(retrievedObject);
       dynamicData = [...retrievedObject];
-      localStorage.setItem("myDate", String(date))
+      localStorage.setItem("myDate", String(date));
     } catch (error) {
       console.error("Error:", error);
     }
@@ -299,44 +295,48 @@ function loadSave() {
 }
 loadSave();
 
-function renderTasks(retrievedObject){
-  todoList.innerHTML= '';
-  dailyTodoList.innerHTML= '';
+function renderTasks(retrievedObject) {
+  todoList.innerHTML = "";
+  dailyTodoList.innerHTML = "";
   retrievedObject.forEach((element) => {
-        const newListItem = createListItem();
-        const newSpan = createSpan();
-        const newInput = createInput();
-        const innerSpan = createInnerSpan(element.task);
-        const newDiv = createButtonDiv();
+    const newListItem = createListItem();
+    const newSpan = createSpan();
+    const newInput = createInput();
+    const innerSpan = createInnerSpan(element.task);
+    const newDiv = createButtonDiv();
 
-        if (element.finished === 1) {
-          innerSpan.classList.add("line-through");
-          newInput.checked = true;
-        }
-        if (element.daily) {
-          if (dailyTodoList.children.length > 0) {
-            newListItem.classList.add("border-t");
-          }
-          dailyTodoList.appendChild(newListItem);
-        } else {
-          if (todoList.children.length > 0) {
-            newListItem.classList.add("border-t");
-          }
-          todoList.appendChild(newListItem);
-        }
-        newListItem.appendChild(newSpan);
-        newListItem.appendChild(newDiv);
-        newSpan.appendChild(newInput);
-        newSpan.appendChild(innerSpan);
-
-      });
+    if (element.finished === 1) {
+      innerSpan.classList.add("line-through");
+      newInput.checked = true;
+    }
+    if (element.daily) {
+      if (dailyTodoList.children.length > 0) {
+        newListItem.classList.add("border-t");
+      }
+      dailyTodoList.appendChild(newListItem);
+    } else {
+      if (todoList.children.length > 0) {
+        newListItem.classList.add("border-t");
+      }
+      todoList.appendChild(newListItem);
+    }
+    newListItem.appendChild(newSpan);
+    newListItem.appendChild(newDiv);
+    newSpan.appendChild(newInput);
+    newSpan.appendChild(innerSpan);
+  });
 }
 
-
-function resetDailyItems(retrievedObject){
-  retrievedObject.forEach((item) =>{
-    if(item.daily){
+function resetDailyItems(retrievedObject) {
+  retrievedObject.forEach((item) => {
+    if (item.daily) {
       item.finished = 0;
     }
   });
+  try {
+    localStorage.setItem("myDynamicObject", JSON.stringify(retrievedObject));
+    console.log("Guardado Correctamente");
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }
