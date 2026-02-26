@@ -17,6 +17,21 @@ const month = time.getMonth() + 1;
 mainEventListener.addEventListener("click", manageClick);
 mainEventListener.addEventListener("keydown", manageKey);
 
+
+/******************************************************************************
+ 
+            MANAGE EVENTS
+  
+  Funtions:
+    manageClick
+    manageKey
+
+  Purpose:
+      When an event occurs, it is managed through these functions, depending 
+    on where and when the event happened, and the state of the page. 
+
+******************************************************************************/
+
 function manageClick(event) {
   const currentItem = event.target;
   if (
@@ -46,6 +61,19 @@ function manageKey(event) {
 /******************************************************************************
  
             ADD NEW TASK
+  
+  Funtions:
+    addNewTask
+    createListItem
+    createSpan
+    createInput
+    createInnerSpan
+    createButtonDiv
+
+  Purpose:
+      When a new task is entered, it is checked to have content, then a new 
+    item is created, formated, and appended to the correct task list. It is
+    then added to dynamicData and saved to Local Storage.
 
 ******************************************************************************/
 
@@ -144,6 +172,14 @@ function createButtonDiv() {
  
             DELETE TASK
 
+  Funtion: 
+    deleteTask
+
+  Purpose:
+      When the delete button is clicked, the closest list item is located in 
+    the local storage, then deleted from the DOM and from the dynamicData 
+    array and the changes are saved.
+
 ******************************************************************************/
 
 function deleteTask(event) {
@@ -162,6 +198,21 @@ function deleteTask(event) {
 /******************************************************************************
  
             EDIT TASK
+    
+  Funtions:
+    editTask
+    endEdit
+
+  Purpose:
+      When the edit button is pressed, the closest list item is selected and
+    the text is converted into an input for the user to change the task name.
+    A radio is inserted with the label "Cambiar" to indicate a desired switch
+    of list. The list item is saved as the active item. Then, when another 
+    click comes outside of the edit area, or the enter key is pressed, the 
+    input is replaced with the new text as entered, and, if the Cambiar input
+    was pressed, the object within the dynamicData is changed accordingly.
+    Then the list is saved to the local storage and re-rendered with the 
+    changes.
 
 ******************************************************************************/
 
@@ -237,6 +288,14 @@ function endEdit(active) {
  
             FINISH TASK
 
+  Function:
+    Finish Task
+
+  Purpose:
+      When the finished checkbox next to each task is checked, the text in that
+    item is crossed out. If the task was already finished, then the line is 
+    removed. Data is then saved in local storage.
+
 ******************************************************************************/
 
 function finishTask(event) {
@@ -273,6 +332,20 @@ function finishTask(event) {
 /******************************************************************************
  
             LOCAL STORAGE
+  
+  Functions:
+    loadSave
+    renderTasks
+    resetDailyItems
+
+  Purpose:
+      The local storage is retrived, with the list, the last day, and the last
+    month at time of previous login. If data is found, it is converted to JS.
+    If the day or month has changed, the daily items are searched in the array
+    and the finished key is set to 0 and then saved. The tasks are then 
+    rendered by creating a list item for each task. The dynamicData array is
+    updated, along with day and month. This runs automatically when the page
+    loads.
 
 ******************************************************************************/
 
