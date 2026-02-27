@@ -34,26 +34,26 @@ mainEventListener.addEventListener("keydown", manageKey);
 
 function manageClick(event) {
   const currentItem = event.target;
+  const currentButton = currentItem.closest("button");
+
   if (
     activeToggle === 1 &&
     currentItem !== activeEdit.children[0].children[1] &&
     currentItem.closest("div") !== activeEdit.children[1]
   ) {
     endEdit(activeEdit);
-  }
-  const currentButton = currentItem.closest("button");
-
-  if (currentButton.id === "addNew") {
-    addNewTask();
-  } else if (currentButton.dataset.action === "delete") {
-    deleteTask(event.target);
-  } else if (currentButton.dataset.action === "edit") {
+  } else if (currentButton && currentButton.dataset.action === "edit") {
     editTask(event.target);
+  }
+  if (currentButton && currentButton.id === "addNew") {
+    addNewTask();
+  } else if (currentButton && currentButton.dataset.action === "delete") {
+    deleteTask(event.target);
   } else if (currentItem.type === "checkbox") {
     finishTask(event.target);
   }
+  console.log(activeToggle);
 }
-
 function manageKey(event) {
   if (activeToggle === 1 && event.key === "Enter") {
     endEdit(activeEdit);
