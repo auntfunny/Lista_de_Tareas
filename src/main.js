@@ -4,6 +4,12 @@ const newTask = document.querySelector("#newTask");
 const addNew = document.querySelector("#addNew");
 const daily = document.querySelector("#daily");
 const mainEventListener = document.querySelector("#mainEventListener");
+const inputModal = document.querySelector("#inputModal");
+const newForm = document.querySelector("#newForm");
+const dateBox = document.querySelector("#dateBox");
+const timeBox = document.querySelector("#timeBox");
+const priceBox = document.querySelector("#priceBox");
+const dateOfTask = document.querySelector("#dateOfTask");
 
 let dynamicData = [];
 
@@ -14,9 +20,11 @@ let activeToggle = 0;
 const time = new Date();
 const date = time.getDate();
 const month = time.getMonth() + 1;
-mainEventListener.addEventListener("click", manageClick);
+mainEventListener.addEventListener("click", manageMainClick);
 mainEventListener.addEventListener("keydown", manageKey);
-
+inputModal.addEventListener("change", manageModalChange);
+inputModal.addEventListener("click", manageModalClick);
+newForm.addEventListener("submit", createNewTask);
 
 /******************************************************************************
  
@@ -32,7 +40,7 @@ mainEventListener.addEventListener("keydown", manageKey);
 
 ******************************************************************************/
 
-function manageClick(event) {
+function manageMainClick(event) {
   const currentItem = event.target;
   const currentButton = currentItem.closest("button");
 
@@ -46,7 +54,7 @@ function manageClick(event) {
     editTask(event.target);
   }
   if (currentButton && currentButton.id === "addNew") {
-    addNewTask();
+    showModal();
   } else if (currentButton && currentButton.dataset.action === "delete") {
     deleteTask(event.target);
   } else if (currentItem.type === "checkbox") {
@@ -56,6 +64,37 @@ function manageClick(event) {
 function manageKey(event) {
   if (activeToggle === 1 && event.key === "Enter") {
     endEdit(activeEdit);
+  }
+}
+
+function manageModalClick(event) {
+  const currentItem = event.target;
+  if (currentItem === inputModal || currentItem.closest("#closeModal")) {
+    hideModal();
+  }
+}
+
+function manageModalChange(event) {
+  const currentLabel = event.target.closest("label");
+
+  if (currentLabel) {
+    const next = currentLabel.nextElementSibling;
+    if (
+      currentLabel.classList.contains("slider") &&
+      next.classList.contains("max-h-0")
+    ) {
+      showBox(next);
+    } else if (currentLabel.classList.contains("slider")) {
+      hideBox(next);
+    }
+    if (
+      currentLabel.id === "dailySlider" &&
+      next.classList.contains("hidden")
+    ) {
+      showInput(next);
+    } else if (currentLabel.id === "dailySlider") {
+      hideInput(next);
+    }
   }
 }
 
@@ -78,48 +117,36 @@ function manageKey(event) {
 
 ******************************************************************************/
 
-function addNewTask() {
-  const newText = newTask.value;
-  const isDaily = daily.checked;
-
-  if (!newText) {
-    alert("Ingresa una tarea nueva");
+function addNewTask({ title, daily, urgency }) {
+  const newListItem = createListItem();
+  const newSpan = createSpan();
+  const newInput = createInput();
+  const innerSpan = createInnerSpan(title, urgency);
+  const newDiv = createButtonDiv();
+  if (daily) {
+    if (dailyTodoList.children.length > 0) {
+      newListItem.classList.add("border-t");
+    }
+    dailyTodoList.appendChild(newListItem);
   } else {
-    const newListItem = createListItem();
-    const newSpan = createSpan();
-    const newInput = createInput();
-    const innerSpan = createInnerSpan(newText);
-    const newDiv = createButtonDiv();
-    if (isDaily) {
-      if (dailyTodoList.children.length > 0) {
-        newListItem.classList.add("border-t");
-      }
-      dailyTodoList.appendChild(newListItem);
-    } else {
-      if (todoList.children.length > 0) {
-        newListItem.classList.add("border-t");
-      }
-      todoList.appendChild(newListItem);
+    if (todoList.children.length > 0) {
+      newListItem.classList.add("border-t");
     }
-    newListItem.appendChild(newSpan);
-    newListItem.appendChild(newDiv);
-    newSpan.appendChild(newInput);
-    newSpan.appendChild(innerSpan);
+    todoList.appendChild(newListItem);
+  }
+  newListItem.appendChild(newSpan);
+  newListItem.appendChild(newDiv);
+  newSpan.appendChild(newInput);
+  newSpan.appendChild(innerSpan);
+}
 
-    newTask.value = "";
-    daily.checked = false;
-    const dynamicObject = {
-      task: newText,
-      finished: 0,
-      daily: isDaily,
-    };
-    dynamicData.push(dynamicObject);
-    try {
-      localStorage.setItem("myDynamicObject", JSON.stringify(dynamicData));
-      console.log("Guardado Correctamente");
-    } catch (error) {
-      console.error("Error:", error);
-    }
+function dynamicallySave(taskObject) {
+  dynamicData.push(taskObject);
+  try {
+    localStorage.setItem("myDynamicObject", JSON.stringify(dynamicData));
+    console.log("Guardado Correctamente");
+  } catch (error) {
+    console.error("Error:", error);
   }
 }
 
@@ -141,14 +168,28 @@ function createSpan() {
 function createInput() {
   const newInput = document.createElement("input");
   newInput.type = "checkbox";
-  newInput.classList.add("accent-acc5");
+  newInput.classList.add("accent-acc5", "w-8");
   return newInput;
 }
 
-function createInnerSpan(newText) {
+function createInnerSpan(newText, urgency) {
   const innerSpan = document.createElement("span");
   innerSpan.classList.add("pl-2", "text-acc5");
-  innerSpan.textContent = newText;
+  switch (Number(urgency)) {
+    case 3:
+      innerSpan.innerHTML = '<span class="text-red-500 font-bold">!!! </span>';
+      break;
+    case 2:
+      innerSpan.innerHTML = '<span class="text-orange-500 font-bold">!! </span>';
+      break;
+    case 1:
+      innerSpan.innerHTML = '<span class="text-yellow-500 font-bold">! </span>';
+      break;
+  }
+  const newSpan = document.createElement("span");
+  newSpan.classList.add("title");
+  newSpan.textContent += newText;
+  innerSpan.appendChild(newSpan);
   return innerSpan;
 }
 
@@ -189,9 +230,9 @@ function createButtonDiv() {
 
 function deleteTask(event) {
   const currentListItem = event.closest("li");
-  const dynamicIndex = currentListItem.children[0].children[1].textContent;
+  const dynamicIndex = currentListItem.querySelector(".title").textContent;
   currentListItem.remove();
-  dynamicData = dynamicData.filter((item) => item.task !== dynamicIndex);
+  dynamicData = dynamicData.filter((item) => item.title !== dynamicIndex);
   try {
     localStorage.setItem("myDynamicObject", JSON.stringify(dynamicData));
     console.log("Guardado Correctamente");
@@ -225,7 +266,7 @@ let textBeforeEdit;
 
 function editTask(event) {
   const currentListItem = event.closest("li");
-  const taskText = currentListItem.children[0].children[1].textContent;
+  const taskText = currentListItem.querySelector(".title").textContent;
   const inputClasses =
     "w-30 md:w-80 border border-acc3 placeholder:text-gray-400 bg-acc1 p-1 rounded-md text-acc5 caret-acc5 focus:outline-none focus:bg-white focus:inset-ring-1 focus:inset-ring-acc5".split(
       " ",
@@ -268,9 +309,9 @@ function endEdit(active) {
     activeEdit = "";
     activeToggle = 0;
     const currentObject = dynamicData.find(
-      (object) => object.task === textBeforeEdit,
+      (object) => object.title === textBeforeEdit,
     );
-    currentObject.task = edittedTask;
+    currentObject.title = edittedTask;
     if (ifChange && currentObject.daily) {
       currentObject.daily = false;
     } else if (ifChange) {
@@ -305,12 +346,12 @@ function endEdit(active) {
 
 function finishTask(event) {
   const listItem = event.closest("li");
-  const taskAtHand = listItem.children[0].children[1];
+  const taskAtHand = listItem.querySelector(".title");
   const currentCheckBox = event;
   if (currentCheckBox.checked) {
     taskAtHand.classList.add("line-through");
     const currentObject = dynamicData.find(
-      (object) => object.task === listItem.children[0].children[1].textContent,
+      (object) => object.title === taskAtHand.textContent,
     );
     currentObject.finished = 1;
     try {
@@ -322,7 +363,7 @@ function finishTask(event) {
   } else {
     taskAtHand.classList.remove("line-through");
     const currentObject = dynamicData.find(
-      (object) => object.task === listItem.children[0].children[1].textContent,
+      (object) => object.title === taskAtHand.textContent,
     );
     currentObject.finished = 0;
     try {
@@ -333,6 +374,99 @@ function finishTask(event) {
     }
   }
 }
+
+/******************************************************************************
+ 
+            MODAL
+
+******************************************************************************/
+
+function showModal() {
+  inputModal.classList.remove("invisible");
+  inputModal.classList.remove("opacity-0");
+  inputModal.classList.add("opacity-100");
+}
+
+function hideModal() {
+  inputModal.classList.remove("opacity-100");
+  inputModal.classList.add("invisible");
+  inputModal.classList.add("opacity-0");
+}
+
+function showBox(box) {
+  box.classList.remove("max-h-0");
+  box.classList.add("max-h-100");
+}
+
+function hideBox(box) {
+  box.classList.remove("max-h-100");
+  box.classList.add("max-h-0");
+}
+
+function hideInput(input) {
+  input.classList.add("hidden");
+  const parent = input.parentNode;
+  parent.classList.add("min-h-29");
+  setTimeout(() => {
+    parent.classList.remove("min-h-29");
+    parent.classList.add("min-h-0");
+  }, 100);
+}
+
+function showInput(input) {
+  const parent = input.parentNode;
+  parent.classList.remove("min-h-0");
+  parent.classList.add("min-h-29");
+  setTimeout(() => {
+    input.classList.remove("hidden");
+    parent.classList.remove("min-h-29");
+  }, 500);
+}
+
+function createNewTask(event) {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+  if (formData.get("newTask")) {
+    const newTaskObject = {
+      title: formData.get("newTask"),
+      date: formData.get("withDate")
+        ? !formData.get("daily")
+          ? formData.get("dateOfTask")
+          : null
+        : null,
+      daily: formData.get("withDate")
+        ? formData.get("daily")
+          ? true
+          : false
+        : false,
+      time: formData.get("withTime") ? formData.get("timeOfTask") : null,
+      price: formData.get("withPrice") ? formData.get("priceOfTask") : null,
+      urgency: formData.get("urgent"),
+      finished: 0,
+    };
+
+    addNewTask(newTaskObject);
+    dynamicallySave(newTaskObject);
+    newForm.reset();
+    hideModal();
+    if (formData.get("withDate")) {
+      hideBox(dateBox);
+    }
+    if (formData.get("withTime")) {
+      hideBox(timeBox);
+    }
+    if (formData.get("withPrice")) {
+      hideBox(priceBox);
+    }
+    if (formData.get("daily")) {
+      showInput(dateOfTask);
+    }
+  } else {
+    alert("Ingresa una nueva tarea");
+  }
+}
+
+
 
 /******************************************************************************
  
@@ -382,38 +516,44 @@ function loadSave() {
     console.log('No hay data en "myDynamicObject".');
   }
 }
+
 loadSave();
 
 function renderTasks(retrievedObject) {
   todoList.innerHTML = "";
   dailyTodoList.innerHTML = "";
   retrievedObject.forEach((element) => {
-    const newListItem = createListItem();
-    const newSpan = createSpan();
-    const newInput = createInput();
-    const innerSpan = createInnerSpan(element.task);
-    const newDiv = createButtonDiv();
-
-    if (element.finished === 1) {
-      innerSpan.classList.add("line-through");
-      newInput.checked = true;
-    }
-    if (element.daily) {
-      if (dailyTodoList.children.length > 0) {
-        newListItem.classList.add("border-t");
-      }
-      dailyTodoList.appendChild(newListItem);
-    } else {
-      if (todoList.children.length > 0) {
-        newListItem.classList.add("border-t");
-      }
-      todoList.appendChild(newListItem);
-    }
-    newListItem.appendChild(newSpan);
-    newListItem.appendChild(newDiv);
-    newSpan.appendChild(newInput);
-    newSpan.appendChild(innerSpan);
+    renderItem(element);
   });
+}
+
+function renderItem(element) {
+  const newListItem = createListItem();
+  const newSpan = createSpan();
+  const newInput = createInput();
+  const innerSpan = createInnerSpan(element.title, element.urgency);
+  const newDiv = createButtonDiv();
+
+  if (element.finished === 1) {
+    const title = innerSpan.querySelector(".title");
+    title.classList.add("line-through");
+    newInput.checked = true;
+  }
+  if (element.daily) {
+    if (dailyTodoList.children.length > 0) {
+      newListItem.classList.add("border-t");
+    }
+    dailyTodoList.appendChild(newListItem);
+  } else {
+    if (todoList.children.length > 0) {
+      newListItem.classList.add("border-t");
+    }
+    todoList.appendChild(newListItem);
+  }
+  newListItem.appendChild(newSpan);
+  newListItem.appendChild(newDiv);
+  newSpan.appendChild(newInput);
+  newSpan.appendChild(innerSpan);
 }
 
 function resetDailyItems(retrievedObject) {

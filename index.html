@@ -14,36 +14,221 @@
     <link rel="stylesheet" href="./src/style.css" />
     <script type="module" src="./src/main.js"></script>
   </head>
-  <body id="mainEventListener"
+  <body
+    
     class="flex justify-center items-center min-w-full min-h-screen bg-acc2 font-nunito"
   >
-    <main 
-      class="flex flex-col justify-center items-center gap-4 w-sm md:w-xl rounded-lg p-5 bg-white m-6"
+    <!-- Main Task List -->
+    <main
+      id="mainEventListener"
+      class="relative flex flex-col justify-center items-center gap-4 w-sm md:w-xl rounded-lg p-5 bg-white m-6"
     >
+      <!-- Title and Lists -->
       <h1 class="text-3xl text-center text-acc5 underline">Lista de Tareas</h1>
       <h2 class="text-xl self-start text-acc5 underline">Tareas Diarias</h2>
-      <ul id="dailyTodoList" class="w-xs md:w-lg border-b-2 border-acc4">
-      </ul>
+      <ul id="dailyTodoList" class="w-xs md:w-lg border-b-2 border-acc4"></ul>
       <h2 class="text-xl self-start text-acc5 underline">Tareas Generales</h2>
-      <ul id="todoList" class="w-xs md:w-lg pt-2  ">
-      </ul>
-      <div class="flex flex-col md:flex-row items-center gap-2">
+      <ul id="todoList" class="w-xs md:w-lg pt-2"></ul>
+      <!-- New Task Button -->
+      <button
+        type="button"
+        id="addNew"
+        class="absolute top-5 right-5 my-3 p-2 border text-xs md:text-base border-acc5 bg-acc5 text-acc3 rounded-2xl hover:bg-acc3 hover:text-acc5 active:bg-acc4 transition duration-200 ease-in-out"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="size-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 4.5v15m7.5-7.5h-15"
+          />
+        </svg>
+      </button>
+    </main>
+    <!-- Floating Input Modal -->
+    <div
+      id="inputModal"
+      class="fixed flex justify-center items-center w-full h-full opacity-0 invisible bg-[#0d542b79]"
+    >
+      <!-- Modal Body -->
+      <form
+        id="newForm"
+        action="POST"
+        class="relative flex flex-col gap-4 w-xs md:w-sm lg:w-md min-h-100 bg-white p-3 rounded-2xl"
+      >
+        <!-- Close Modal Button -->
+        <div id="closeModal" class="flex justify-center items-center w-10 h-10 absolute top-0 right-0 text-acc5 hover:text-red-600">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="3"
+            stroke="currentColor"
+            class="size-6 active:scale-115"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 18 18 6M6 6l12 12"
+            />
+          </svg>
+        </div>
+        <h3 class="text-xl w-full text-center text-acc5 underline">
+          Agregar Tarea
+        </h3>
+        <!-- New Task Name Input -->
         <div class="flex gap-2">
           <input
-          type="text"
-          id="newTask"
-          name="newTask"
-          placeholder="Agrega Nueva Tarea"
-          class="w-70 md:w-80 border  border-acc3 placeholder:text-gray-400 bg-acc1 p-1 rounded-md text-acc5 caret-acc5 focus:outline-none focus:bg-white focus:inset-ring-1 focus:inset-ring-acc5"
-        />
-        <div class="flex flex-col items-center">
-          <label for="daily" class="text-sm text-acc5">Diario</label>
-          <input type="radio" name="daily" id="daily" class="accent-acc5 scale-125">
+            type="text"
+            id="newTask"
+            name="newTask"
+            placeholder="Nueva Tarea"
+            class="w-full border border-acc3 placeholder:text-gray-400 bg-acc1 p-1 rounded-md text-lg text-acc5 caret-acc5 focus:outline-none focus:bg-white focus:inset-ring-1 focus:inset-ring-acc5"
+          />
         </div>
+        <!-- Date Slider -->
+        <label
+          for="withDate"
+          id="dateCheck"
+          class="slider flex justify-between items-center w-35 gap-3 text-lg text-acc5 hover:cursor-pointer"
+        >
+          <span>Fecha:</span>
+          <input
+            type="checkbox"
+            name="withDate"
+            id="withDate"
+            class="sr-only peer"
+          />
+          <div
+            class="group relative w-10 h-6 md:w-14 md:h-8 rounded-full bg-gray-300 transition-colors duration-300 ease-in-out peer-checked:bg-acc4"
+          >
+            <div
+              class="absolute w-4 h-4 md:w-6 md:h-6 rounded-full left-1 top-1 bg-white transition-transform duration-300 ease-in-out shadow group-peer-checked:translate-x-4 md:group-peer-checked:translate-x-6"
+            ></div>
+          </div>
+        </label>
+        <!-- Input Date Box -->
+        <div
+          id="dateBox"
+          class="max-h-0 overflow-hidden self-center w-2xs md:w-s lg:w-sm bg-gray-100 rounded-lg transition-all duration-750 ease-in-out"
+        >
+          <!-- Daily Slider -->
+          <label
+            for="daily"
+            id="dailySlider"
+            class="overflow-hidden flex w-35 justify-between items-center gap-3 m-3 text-lg text-acc5 hover:cursor-pointer"
+          >
+            <span>Diario:</span>
+            <input
+              type="checkbox"
+              name="daily"
+              id="daily"
+              class="sr-only peer"
+            />
+            <div
+              class="group relative w-10 h-6 md:w-14 md:h-8 rounded-full bg-gray-300 transition-colors duration-300 ease-in-out peer-checked:bg-acc4"
+            >
+              <div
+                class="absolute w-4 h-4 md:w-6 md:h-6 rounded-full left-1 top-1 bg-white transition-transform duration-300 ease-in-out shadow group-peer-checked:translate-x-4 md:group-peer-checked:translate-x-6"
+              ></div>
+            </div>
+          </label>
+          <!-- Date Input -->
+          <input
+            type="date"
+            name="dateOfTask"
+            id="dateOfTask"
+            class="overflow-hidden w-3xs md:w-2xs lg:w-xs border border-acc3 placeholder:text-gray-400 bg-acc1 m-3 p-1 rounded-md text-acc5 caret-acc5 focus:outline-none focus:bg-white focus:inset-ring-1 focus:inset-ring-acc5 "
+          />
         </div>
+        <!-- Time Slider -->
+        <label
+          for="withTime"
+          id="timeCheck"
+          class="slider flex items-center justify-between w-35 gap-3 text-lg text-acc5 hover:cursor-pointer"
+        >
+          <span>Hora:</span>
+          <input
+            type="checkbox"
+            name="withTime"
+            id="withTime"
+            class="sr-only peer"
+          />
+          <div
+            class="group relative w-10 h-6 md:w-14 md:h-8 rounded-full bg-gray-300 transition-colors duration-300 ease-in-out peer-checked:bg-acc4"
+          >
+            <div
+              class="absolute w-4 h-4 md:w-6 md:h-6 rounded-full left-1 top-1 bg-white transition-transform duration-300 ease-in-out shadow group-peer-checked:translate-x-4 md:group-peer-checked:translate-x-6"
+            ></div>
+          </div>
+        </label>
+        <!-- Time Input Box -->
+        <div
+          id="timeBox"
+          class="max-h-0 overflow-hidden self-center w-2xs md:w-s lg:w-sm bg-gray-100 rounded-lg transition-all duration-750 ease-in-out"
+        >
+          <input
+            type="time"
+            name="timeOfTask"
+            id="timeOfTask"
+            class="w-3xs md:w-2xs lg:w-xs border border-acc3 placeholder:text-gray-400 bg-acc1 m-3 p-1 rounded-md text-acc5 caret-acc5 focus:outline-none focus:bg-white focus:inset-ring-1 focus:inset-ring-acc5"
+          />
+        </div>
+        <!-- Price Slider -->
+        <label
+          for="withPrice"
+          id="priceCheck"
+          class="slider flex items-center justify-between w-35 gap-3 text-lg text-acc5 hover:cursor-pointer"
+        >
+          <span>Precio:</span>
+          <input type="checkbox" name="withPrice" id="withPrice" class="sr-only peer" />
+          <div
+            class="group relative w-10 h-6 md:w-14 md:h-8 rounded-full bg-gray-300 transition-colors duration-300 ease-in-out peer-checked:bg-acc4"
+          >
+            <div
+              class="absolute w-4 h-4 md:w-6 md:h-6 rounded-full left-1 top-1 bg-white transition-transform duration-300 ease-in-out shadow group-peer-checked:translate-x-4 md:group-peer-checked:translate-x-6"
+            ></div>
+          </div>
+        </label>
+        <!-- Price Input Box -->
+        <div
+          id="priceBox"
+          class="max-h-0 overflow-hidden relative self-center w-2xs md:w-s lg:w-sm bg-gray-100 rounded-lg transition-all duration-750 ease-in-out"
+        >
+          <input
+            type="number"
+            name="priceOfTask"
+            id="priceOfTask"
+            scale="0.001"
+            inputmode="decimal"
+            placeholder="0.000"
+            class="w-3xs md:w-2xs lg:w-xs border border-acc3 placeholder:text-gray-400 bg-acc1 m-3 p-1 pl-4 rounded-md text-acc5 caret-acc5 focus:outline-none focus:bg-white focus:inset-ring-1 focus:inset-ring-acc5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          />
+          <span class="absolute top-4.25 left-4.25 text-acc5">$</span>
+        </div>
+        <!-- Urgent Select Input -->
+        <label for="urgent" class="flex items-center gap-3 text-lg text-acc5">
+          <span>Urgencia:</span>
+          <select
+            name="urgent"
+            id="urgent"
+            class="w-30 border border-acc3 placeholder:text-gray-400 bg-acc1 p-1 rounded-md text-acc5 caret-acc5 focus:outline-none focus:bg-white focus:inset-ring-1 focus:inset-ring-acc5"
+          >
+            <option value="0">Ninguno</option>
+            <option value="1">Bajo</option>
+            <option value="2">Medio</option>
+            <option value="3">Alto</option>
+          </select>
+        </label>
+        <!-- Submit Form Button -->
         <button
-          type="button"
-          id="addNew"
+          type="submit"
           class="my-3 self-center p-2 border text-xs md:text-base border-acc5 bg-acc5 text-acc3 rounded-2xl hover:bg-acc3 hover:text-acc5 active:bg-acc4 transition duration-200 ease-in-out"
         >
           <svg
@@ -61,7 +246,7 @@
             />
           </svg>
         </button>
-      </div>
-    </main>
+      </form>
+    </div>
   </body>
 </html>
