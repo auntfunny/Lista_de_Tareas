@@ -28,7 +28,7 @@ const submitText = document.querySelector("#submitText");
 
 let dynamicData = [];
 
-localStorage.clear()
+// localStorage.clear()
 
 let activeEdit;
 let activeToggle = 0;
