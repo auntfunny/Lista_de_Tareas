@@ -1,7 +1,6 @@
 const dailyTodoList = document.querySelector("#dailyTodoList");
 const todoList = document.querySelector("#todoList");
 const newTask = document.querySelector("#newTask");
-const addNew = document.querySelector("#addNew");
 const daily = document.querySelector("#daily");
 const mainEventListener = document.querySelector("#mainEventListener");
 const inputModal = document.querySelector("#inputModal");
@@ -29,7 +28,7 @@ const submitText = document.querySelector("#submitText");
 
 let dynamicData = [];
 
-// localStorage.clear()
+localStorage.clear()
 
 let activeEdit;
 let activeToggle = 0;
@@ -47,7 +46,9 @@ newForm.addEventListener("submit", manageSubmit);
   
   Funtions:
     manageClick
-    manageKey
+    manageModalClick
+    manageModalChange
+    manageSubmit
 
   Purpose:
       When an event occurs, it is managed through these functions, depending 
@@ -70,6 +71,8 @@ function manageMainClick(event) {
     inputTitle.textContent = "Agregar Tarea";
     submitText.textContent = "Guardar Tarea";
     showModal();
+  } else if(currentButton && currentButton.id === "filter"){
+    console.log("filter button");
   } else if (currentButton && currentButton.dataset.action === "edit") {
     inputTitle.textContent = "Editar Tarea";
     submitText.textContent = "Guardar Cambios";
@@ -232,9 +235,9 @@ function createButtonDiv() {
     deleteTask
 
   Purpose:
-      When the delete button is clicked, the closest list item is located in 
-    the local storage, then deleted from the DOM and from the dynamicData 
-    array and the changes are saved.
+      When the delete button is clicked, the object clicked is located in the
+    list and in the dynamic array and deleted from both places, then the 
+    dynamic data is saved to the local storage.
 
 ******************************************************************************/
 
@@ -263,10 +266,13 @@ function deleteTask() {
     
   Funtions:
     editTask
-    endEdit
+    changeExistingTask
 
   Purpose:
-      
+      The active task is found in the dynamic array, then the info is inserted
+    into the input modal to edit the task. When the submit button it pressed
+    the object is edited in the dynamic array and the items are re-rendered,
+    and the dynamic data is saved to the local storage.
 
 ******************************************************************************/
 
@@ -389,6 +395,7 @@ function finishTask(event) {
 /******************************************************************************
  
             INFO BOX
+
 
 ******************************************************************************/
 
@@ -586,7 +593,9 @@ function createNewTask(event) {
   Functions:
     loadSave
     renderTasks
+    renderItem
     resetDailyItems
+    dynamicallySave
 
   Purpose:
       The local storage is retrived, with the list, the last day, and the last
