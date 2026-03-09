@@ -5,11 +5,27 @@ const addNew = document.querySelector("#addNew");
 const daily = document.querySelector("#daily");
 const mainEventListener = document.querySelector("#mainEventListener");
 const inputModal = document.querySelector("#inputModal");
+const inputTitle = document.querySelector("#inputTitle");
 const newForm = document.querySelector("#newForm");
 const dateBox = document.querySelector("#dateBox");
 const timeBox = document.querySelector("#timeBox");
 const priceBox = document.querySelector("#priceBox");
 const dateOfTask = document.querySelector("#dateOfTask");
+const infoBox = document.querySelector("#infoBox");
+const infoTitle = document.querySelector("#infoTitle");
+const descriptionPara = document.querySelector("#descriptionPara");
+const dateSpan = document.querySelector("#dateSpan");
+const timeSpan = document.querySelector("#timeSpan");
+const priceSpan = document.querySelector("#priceSpan");
+const urgentSpan = document.querySelector("#urgentSpan");
+const taskDescription = document.querySelector("#taskDescription");
+const withDate = document.querySelector("#withDate");
+const withTime = document.querySelector("#withTime");
+const timeOfTask = document.querySelector("#timeOfTask");
+const withPrice = document.querySelector("#withPrice");
+const priceOfTask = document.querySelector("#priceOfTask");
+const urgent = document.querySelector("#urgent");
+const submitText = document.querySelector("#submitText");
 
 let dynamicData = [];
 
@@ -21,10 +37,9 @@ const time = new Date();
 const date = time.getDate();
 const month = time.getMonth() + 1;
 mainEventListener.addEventListener("click", manageMainClick);
-mainEventListener.addEventListener("keydown", manageKey);
 inputModal.addEventListener("change", manageModalChange);
 inputModal.addEventListener("click", manageModalClick);
-newForm.addEventListener("submit", createNewTask);
+newForm.addEventListener("submit", manageSubmit);
 
 /******************************************************************************
  
@@ -44,26 +59,28 @@ function manageMainClick(event) {
   const currentItem = event.target;
   const currentButton = currentItem.closest("button");
 
-  if (
-    activeToggle === 1 &&
-    currentItem !== activeEdit.children[0].children[1] &&
-    currentItem.closest("div") !== activeEdit.children[1]
-  ) {
-    endEdit(activeEdit);
-  } else if (currentButton && currentButton.dataset.action === "edit") {
-    editTask(event.target);
+  if (infoBox.classList.contains("opacity-100")) {
+    if (currentItem.closest("div").id === "closeInfo") {
+      closeInfo();
+    } else if (!currentItem.closest("section")) {
+      closeInfo();
+    }
   }
   if (currentButton && currentButton.id === "addNew") {
+    inputTitle.textContent = "Agregar Tarea";
+    submitText.textContent = "Guardar Tarea";
     showModal();
+  } else if (currentButton && currentButton.dataset.action === "edit") {
+    inputTitle.textContent = "Editar Tarea";
+    submitText.textContent = "Guardar Cambios";
+    editTask();
+    showModal();
+  } else if (currentButton && currentButton.dataset.action === "info") {
+    openInfo(event.target);
   } else if (currentButton && currentButton.dataset.action === "delete") {
-    deleteTask(event.target);
+    deleteTask();
   } else if (currentItem.type === "checkbox") {
     finishTask(event.target);
-  }
-}
-function manageKey(event) {
-  if (activeToggle === 1 && event.key === "Enter") {
-    endEdit(activeEdit);
   }
 }
 
@@ -95,6 +112,14 @@ function manageModalChange(event) {
     } else if (currentLabel.id === "dailySlider") {
       hideInput(next);
     }
+  }
+}
+
+function manageSubmit(event) {
+  if (inputTitle.textContent === "Agregar Tarea") {
+    createNewTask(event);
+  } else {
+    changeExistingTask(event);
   }
 }
 
@@ -140,15 +165,6 @@ function addNewTask({ title, daily, urgency }) {
   newSpan.appendChild(innerSpan);
 }
 
-function dynamicallySave(taskObject) {
-  dynamicData.push(taskObject);
-  try {
-    localStorage.setItem("myDynamicObject", JSON.stringify(dynamicData));
-    console.log("Guardado Correctamente");
-  } catch (error) {
-    console.error("Error:", error);
-  }
-}
 
 function createListItem() {
   const newListItem = document.createElement("li");
@@ -180,7 +196,8 @@ function createInnerSpan(newText, urgency) {
       innerSpan.innerHTML = '<span class="text-red-500 font-bold">!!! </span>';
       break;
     case 2:
-      innerSpan.innerHTML = '<span class="text-orange-500 font-bold">!! </span>';
+      innerSpan.innerHTML =
+        '<span class="text-orange-500 font-bold">!! </span>';
       break;
     case 1:
       innerSpan.innerHTML = '<span class="text-yellow-500 font-bold">! </span>';
@@ -196,20 +213,13 @@ function createInnerSpan(newText, urgency) {
 function createButtonDiv() {
   const newDiv = document.createElement("div");
   newDiv.innerHTML = `
-        <button data-action="edit"
+        <button data-action="info"
               class="text-xs m-1 p-1 border border-acc5 bg-acc5 text-acc3 rounded-2xl hover:bg-acc3 hover:text-acc5 active:bg-acc4 transition duration-200 ease-in-out"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
               </svg>
-            </button>
-            <button data-action="delete"
-              class="text-xs m-1 p-1 border border-acc5 bg-acc5 text-acc3 rounded-2xl hover:bg-acc3 hover:text-acc5 active:bg-acc4 transition duration-200 ease-in-out"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-              </svg>
-        </button>
+            </button>     
     `;
   return newDiv;
 }
@@ -228,11 +238,17 @@ function createButtonDiv() {
 
 ******************************************************************************/
 
-function deleteTask(event) {
-  const currentListItem = event.closest("li");
-  const dynamicIndex = currentListItem.querySelector(".title").textContent;
+function deleteTask() {
+  const tasks = document.querySelectorAll(".title");
+  const currentTask = Array.from(tasks).find(
+    (task) => task.textContent === infoTitle.textContent,
+  );
+  const currentListItem = currentTask.closest("li");
   currentListItem.remove();
-  dynamicData = dynamicData.filter((item) => item.title !== dynamicIndex);
+  closeInfo();
+  dynamicData = dynamicData.filter(
+    (item) => item.title !== currentTask.textContent,
+  );
   try {
     localStorage.setItem("myDynamicObject", JSON.stringify(dynamicData));
     console.log("Guardado Correctamente");
@@ -250,84 +266,79 @@ function deleteTask(event) {
     endEdit
 
   Purpose:
-      When the edit button is pressed, the closest list item is selected and
-    the text is converted into an input for the user to change the task name.
-    A radio is inserted with the label "Cambiar" to indicate a desired switch
-    of list. The list item is saved as the active item. Then, when another 
-    click comes outside of the edit area, or the enter key is pressed, the 
-    input is replaced with the new text as entered, and, if the Cambiar input
-    was pressed, the object within the dynamicData is changed accordingly.
-    Then the list is saved to the local storage and re-rendered with the 
-    changes.
+      
 
 ******************************************************************************/
 
-let textBeforeEdit;
-
-function editTask(event) {
-  const currentListItem = event.closest("li");
-  const taskText = currentListItem.querySelector(".title").textContent;
-  const inputClasses =
-    "w-30 md:w-80 border border-acc3 placeholder:text-gray-400 bg-acc1 p-1 rounded-md text-acc5 caret-acc5 focus:outline-none focus:bg-white focus:inset-ring-1 focus:inset-ring-acc5".split(
-      " ",
-    );
-  const changeListClasses = "flex flex-col items-center".split(" ");
-  textBeforeEdit = taskText;
-  const editBox = document.createElement("input");
-  editBox.type = "text";
-  editBox.value = taskText;
-  editBox.classList.add(...inputClasses);
-  const changeListRadio = document.createElement("div");
-  changeListRadio.classList.add(...changeListClasses);
-  changeListRadio.innerHTML = `
-          <label for="change" class="text-sm text-acc5">Cambiar</label>
-          <input type="radio" name="change" id="change" class="accent-acc5 scale-125">
-  `;
-
-  currentListItem.children[0].children[1].remove();
-  currentListItem.children[0].appendChild(editBox);
-  currentListItem.children[0].insertAdjacentElement(
-    "afterend",
-    changeListRadio,
+function editTask() {
+  closeInfo();
+  const tasks = document.querySelectorAll(".title");
+  const currentTask = Array.from(tasks).find(
+    (task) => task.textContent === infoTitle.textContent,
   );
-  activeEdit = currentListItem;
-  activeToggle = 1;
+  const currentObject = dynamicData.find(
+    (task) => task.title === currentTask.textContent,
+  );
+  activeEdit = currentObject;
+  newTask.value = currentObject.title;
+  taskDescription.value = currentObject.description || "";
+  if (currentObject.date || currentObject.daily) {
+    withDate.checked = true;
+    showBox(dateBox);
+    if (currentObject.daily) {
+      daily.checked = true;
+      hideInput(dateOfTask);
+    } else {
+      dateOfTask.value = currentObject.date;
+    }
+  }
+  if (currentObject.time) {
+    withTime.checked = true;
+    showBox(timeBox);
+    timeOfTask.value = currentObject.time;
+  }
+  if (currentObject.price) {
+    withPrice.checked = true;
+    showBox(priceBox);
+    priceOfTask.value = currentObject.price;
+  }
+  if (currentObject.urgency !== "0") {
+    urgent.value = Number(currentObject.urgency);
+  }
 }
 
-function endEdit(active) {
-  const edittedTask = active.children[0].children[1].value;
-  const ifChange = active.children[1].children[1].checked;
-  if (edittedTask) {
-    active.children[0].children[1].remove();
-    active.children[1].remove();
-    const textEdit = createInnerSpan(edittedTask);
-    active.children[0].appendChild(textEdit);
-    if (active.children[0].children[0].checked) {
-      textEdit.classList.add("line-through");
-    }
-
-    activeEdit = "";
-    activeToggle = 0;
-    const currentObject = dynamicData.find(
-      (object) => object.title === textBeforeEdit,
-    );
-    currentObject.title = edittedTask;
-    if (ifChange && currentObject.daily) {
-      currentObject.daily = false;
-    } else if (ifChange) {
-      currentObject.daily = true;
-    }
-
-    try {
-      localStorage.setItem("myDynamicObject", JSON.stringify(dynamicData));
-      console.log("Guaradado Correctamente");
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  } else {
-    alert("Ingresa un nuevo nombre");
-  }
+function changeExistingTask(event) {
+  event.preventDefault();
+  const currentObject = activeEdit;
+  const formData = new FormData(event.target);
+  currentObject.title = formData.get("newTask").trim();
+  currentObject.description = formData.get("taskDescription").trim();
+  currentObject.date = formData.get("withDate")
+    ? !formData.get("daily")
+      ? formData.get("dateOfTask")
+      : null
+    : null;
+  currentObject.daily = formData.get("withDate")
+    ? formData.get("daily")
+      ? true
+      : false
+    : false;
+  currentObject.time = formData.get("withTime")
+    ? formData.get("timeOfTask")
+    : null;
+  currentObject.price = formData.get("withPrice")
+    ? formData.get("priceOfTask")
+    : null;
+  currentObject.urgency = formData.get("urgent");
+  hideModal();
   renderTasks(dynamicData);
+
+  try {
+    localStorage.setItem("myDynamicObject", JSON.stringify(dynamicData));
+    console.log("Guardado Correctamente");
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }
 
 /******************************************************************************
@@ -377,6 +388,78 @@ function finishTask(event) {
 
 /******************************************************************************
  
+            INFO BOX
+
+******************************************************************************/
+
+function openInfo(event) {
+  infoBox.classList.remove("opacity-0");
+  infoBox.classList.remove("invisible");
+  infoBox.classList.add("opacity-100");
+  formatInfo(event);
+}
+
+function closeInfo() {
+  infoBox.classList.remove("opacity-100");
+  infoBox.classList.add("opacity-0");
+  infoBox.classList.add("invisible");
+}
+
+function formatInfo(event) {
+  const listItem = event.closest("li");
+  const itemName = listItem.querySelector(".title");
+  const currentObject = dynamicData.find(
+    (object) => object.title === itemName.textContent,
+  );
+  infoTitle.textContent = currentObject.title;
+  if (currentObject.description) {
+    descriptionPara.textContent = currentObject.description;
+  } else {
+    descriptionPara.textContent = "No hay descripción";
+  }
+  if (currentObject.date) {
+    dateSpan.textContent = currentObject.date;
+  } else if (currentObject.daily) {
+    dateSpan.textContent = "Diaria";
+  } else {
+    dateSpan.textContent = "No hay fecha";
+  }
+  if (currentObject.time) {
+    timeSpan.textContent = currentObject.time;
+  } else {
+    timeSpan.textContent = "No hay hora";
+  }
+  if (currentObject.price) {
+    priceSpan.textContent = `$${currentObject.price}`;
+  } else {
+    priceSpan.textContent = "No hay precio";
+  }
+  urgentSpan.classList.remove("text-red-500");
+  urgentSpan.classList.remove("text-orange-500");
+  urgentSpan.classList.remove("text-yellow-500");
+  if (currentObject.urgency) {
+    switch (currentObject.urgency) {
+      case "3":
+        urgentSpan.textContent = "Alto";
+        urgentSpan.classList.add("text-red-500");
+        break;
+      case "2":
+        urgentSpan.textContent = "Medio";
+        urgentSpan.classList.add("text-orange-500");
+        break;
+      case "1":
+        urgentSpan.textContent = "Bajo";
+        urgentSpan.classList.add("text-yellow-500");
+        break;
+      case "0":
+        urgentSpan.textContent = "No hay urgencia";
+        break;
+    }
+  }
+}
+
+/******************************************************************************
+ 
             MODAL
 
 ******************************************************************************/
@@ -391,6 +474,35 @@ function hideModal() {
   inputModal.classList.remove("opacity-100");
   inputModal.classList.add("invisible");
   inputModal.classList.add("opacity-0");
+  cleanInputs();
+}
+
+function cleanInputs() {
+  newTask.value = "";
+  taskDescription.value = "";
+  if (withDate) {
+    if (daily) {
+      showInput(dateOfTask);
+      daily.checked = false;
+    } else {
+      dateOfTask.value = "";
+    }
+    withDate.checked = false;
+    hideBox(dateBox);
+  }
+  if (withTime) {
+    timeOfTask.value = "";
+    hideBox(timeBox);
+    withTime.checked = false;
+  }
+  if (withPrice) {
+    priceOfTask.value = "";
+    hideBox(priceBox);
+    withPrice.checked = false;
+  }
+  if (urgent !== 0) {
+    urgent.value = 0;
+  }
 }
 
 function showBox(box) {
@@ -428,7 +540,8 @@ function createNewTask(event) {
   const formData = new FormData(event.target);
   if (formData.get("newTask")) {
     const newTaskObject = {
-      title: formData.get("newTask"),
+      title: formData.get("newTask").trim(),
+      description: formData.get("taskDescription").trim(),
       date: formData.get("withDate")
         ? !formData.get("daily")
           ? formData.get("dateOfTask")
@@ -465,8 +578,6 @@ function createNewTask(event) {
     alert("Ingresa una nueva tarea");
   }
 }
-
-
 
 /******************************************************************************
  
@@ -564,6 +675,16 @@ function resetDailyItems(retrievedObject) {
   });
   try {
     localStorage.setItem("myDynamicObject", JSON.stringify(retrievedObject));
+    console.log("Guardado Correctamente");
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+function dynamicallySave(taskObject) {
+  dynamicData.push(taskObject);
+  try {
+    localStorage.setItem("myDynamicObject", JSON.stringify(dynamicData));
     console.log("Guardado Correctamente");
   } catch (error) {
     console.error("Error:", error);
